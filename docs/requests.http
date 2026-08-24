@@ -1,0 +1,83 @@
+### API Router — sample requests
+### Open in VS Code (REST Client extension) or JetBrains Rider and click "Send".
+### The seeded demo API key works immediately.
+
+@host = http://localhost:5080
+@apiKey = demo-key-please-change
+
+### Health check (anonymous)
+GET {{host}}/health
+
+### List seeded targets (admin-only management endpoint)
+GET {{host}}/api/targets
+X-Api-Key: {{apiKey}}
+
+### List rules (admin-only)
+GET {{host}}/api/rules
+X-Api-Key: {{apiKey}}
+
+### Create a regular (non-admin) user — admin only.
+### The response contains the raw apiKey ONCE; only its hash is stored. Save it now.
+POST {{host}}/api/users
+Content-Type: application/json
+X-Api-Key: {{apiKey}}
+
+{
+  "name": "teammate",
+  "isAdmin": false
+}
+
+###############################################################################
+# 1. Bundled fan-out: two sub-requests in one dispatch, returned together.
+###############################################################################
+POST {{host}}/api/dispatches
+Content-Type: application/json
+X-Api-Key: {{apiKey}}
+
+{
+  "mode": "Parallel",
+  "steps": [
+    { "targetKey": "httpbin", "method": "GET", "path": "/uuid" },
+    { "targetKey": "httpbin", "method": "POST", "path": "/anything",
+      "body": { "hello": "world" } }
+  ]
+}
+
+###############################################################################
+# 2. The flagship demo: change the desktop wallpaper via an action target.
+###############################################################################
+POST {{host}}/api/dispatches
+Content-Type: application/json
+X-Api-Key: {{apiKey}}
+
+{
+  "mode": "Sequential",
+  "steps": [
+    { "targetKey": "wallpaper",
+      "parameters": { "imageUrl": "https://picsum.photos/1920/1080" } }
+  ]
+}
+
+###############################################################################
+# 3. Automatic requests: a schedule that rotates the wallpaper every 60s.
+###############################################################################
+POST {{host}}/api/schedules
+Content-Type: application/json
+X-Api-Key: {{apiKey}}
+
+{
+  "name": "rotate-wallpaper",
+  "intervalSeconds": 60,
+  "isActive": true,
+  "dispatch": {
+    "mode": "Sequential",
+    "steps": [
+      { "targetKey": "wallpaper",
+        "parameters": { "imageUrl": "https://picsum.photos/1920/1080" } }
+    ]
+  }
+}
+
+### Inspect your dispatch history (including scheduled runs)
+GET {{host}}/api/dispatches
+X-Api-Key: {{apiKey}}

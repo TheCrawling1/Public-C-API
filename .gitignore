@@ -1,0 +1,22 @@
+# .NET build output
+bin/
+obj/
+out/
+
+# Local database files created at runtime
+*.db
+*.db-shm
+*.db-wal
+
+# Downloaded wallpapers (created by the set-wallpaper action)
+**/wallpapers/
+
+# IDE / tooling
+.vs/
+.vscode/
+*.user
+*.suo
+
+# OS noise
+.DS_Store
+Thumbs.db
